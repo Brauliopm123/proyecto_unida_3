@@ -1,0 +1,6 @@
+# Dependencias que se necesitan
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dotenv
