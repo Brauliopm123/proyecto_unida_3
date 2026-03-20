@@ -9,7 +9,7 @@ function App(){
     <div>
 
       <div className="navbar">
-        Anime Tracker 🎌
+        Seguimiento de anime
       </div>
 
       <Usuarios />
