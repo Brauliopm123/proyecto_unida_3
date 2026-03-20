@@ -1,7 +1,8 @@
+/* RESET */
 body{
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: #0f0f1a;
+  background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
   color: white;
 }
 
@@ -9,13 +10,20 @@ body{
 .navbar{
   background: #141428;
   padding: 15px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   text-align: center;
   color: #ff4b2b;
+  letter-spacing: 1px;
+  box-shadow: 0px 2px 10px rgba(0,0,0,0.5);
 }
 
-/* GRID DE ANIME */
+/* CONTENEDOR GENERAL */
+.container{
+  padding: 20px;
+}
+
+/* GRID DE TARJETAS */
 .grid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -23,13 +31,14 @@ body{
   padding: 20px;
 }
 
-/* CARDS */
+/* TARJETAS */
 .card{
   background: #1c1c3a;
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 15px;
-  transition: 0.3s;
+  transition: all 0.3s ease;
   cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
 }
 
 .card:hover{
@@ -37,32 +46,67 @@ body{
   background: #29295a;
 }
 
+.card h3{
+  margin-top: 0;
+  color: #ff4b2b;
+}
+
 /* FORMULARIOS */
 .form{
-  background: #1c1c3a;
+  background: rgba(28, 28, 58, 0.95);
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 15px;
   margin: 20px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
 }
 
-input{
+/* INPUTS */
+input, select{
   width: 100%;
-  margin: 5px 0;
+  margin: 8px 0;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 6px;
   border: none;
+  outline: none;
+  background: #2a2a4a;
+  color: white;
 }
 
+/* BOTONES */
 button{
-  background: #ff4b2b;
+  width: 100%;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
   border: none;
   padding: 10px;
   margin-top: 10px;
   color: white;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
 button:hover{
-  background: #ff416c;
+  opacity: 0.8;
+}
+
+/* TITULOS */
+h1, h2, h3{
+  margin-left: 10px;
+}
+
+/* SEPARADOR */
+hr{
+  border: 1px solid #2a2a4a;
+  margin: 20px;
+}
+
+/* SCROLL BONITO */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff4b2b;
+  border-radius: 10px;
 }
