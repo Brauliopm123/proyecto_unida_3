@@ -48,7 +48,7 @@ function Titulos(){
 
       {/* FORMULARIO */}
       <div className="form">
-        <h2>🎬 Crear Anime/Manga</h2>
+        <h2>Crear Anime/Manga</h2>
 
         <input
           name="titulo"
@@ -91,7 +91,7 @@ function Titulos(){
       </div>
 
       {/* LISTA */}
-      <h2 style={{paddingLeft:"20px"}}>📺 Catálogo</h2>
+      <h2 style={{paddingLeft:"20px"}}>Catálogo</h2>
 
       <div className="grid">
 
