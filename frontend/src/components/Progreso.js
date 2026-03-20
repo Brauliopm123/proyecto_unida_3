@@ -47,7 +47,7 @@ function Progreso(){
   return (
     <div className="form">
 
-      <h2>📺 Progreso del Usuario</h2>
+      <h2>Progreso del Usuario</h2>
 
       {/* FORMULARIO */}
       <input
@@ -81,7 +81,7 @@ function Progreso(){
       <hr />
 
       {/* LISTA */}
-      <h3>📊 Historial</h3>
+      <h3>Historial</h3>
 
       {lista.length === 0 ? (
         <p>No hay progreso registrado</p>
