@@ -17,5 +17,8 @@ python -m venv venv
 * **pip install pymysql**
 * **pip install fastapi uvicorn sqlalchemy pymysql pydantic**
 
-# Iniciar el servidor 
+# Iniciar el servidor de fast api 
 uvicorn main:app --reload
+
+# Iniciar el servidor de react
+npm start
