@@ -13,9 +13,9 @@
 python -m venv venv
 
 # Instalar dependencias 
-pip install -r requirements.txt
-pip install pymysql
-pip install fastapi uvicorn sqlalchemy pymysql pydantic
+* **pip install -r requirements.txt**
+* **pip install pymysql**
+* **pip install fastapi uvicorn sqlalchemy pymysql pydantic**
 
 # Iniciar el servidor 
 uvicorn main:app --reload
