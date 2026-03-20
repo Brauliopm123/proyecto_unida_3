@@ -1,28 +1,25 @@
+import "./App.css";
 import Titulos from "./components/Titulos";
 import Usuarios from "./components/Usuarios";
 import Progreso from "./components/Progreso";
-import "./App.css";
 
-function App() {
+function App(){
 
   return (
-    <div className="container">
+    <div>
 
-      <h1>Seguimientoe Anime y Manga</h1>
+      <div className="navbar">
+        Anime Tracker 🎌
+      </div>
 
       <Usuarios />
 
-      <hr />
-
       <Titulos />
-
-      <hr />
 
       <Progreso />
 
     </div>
   );
-
 }
 
 export default App;

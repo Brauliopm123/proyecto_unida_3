@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 
-function Titulos() {
+function Titulos(){
 
   const [titulos, setTitulos] = useState([]);
 
@@ -13,13 +13,25 @@ function Titulos() {
 
   return (
     <div>
-      <h2>Lista de Anime/Manga</h2>
 
-      {titulos.map(t => (
-        <div key={t.id}>
-          <b>{t.titulo}</b> - {t.genero}
-        </div>
-      ))}
+      <h2 style={{paddingLeft:"20px"}}>Catálogo</h2>
+
+      <div className="grid">
+
+        {titulos.map(t => (
+          <div className="card" key={t.id}>
+
+            <h3>{t.titulo}</h3>
+
+            <p><b>Género:</b> {t.genero}</p>
+            <p><b>Estado:</b> {t.estado}</p>
+            <p><b>Episodios:</b> {t.total_episodios}</p>
+
+          </div>
+        ))}
+
+      </div>
+
     </div>
   );
 }

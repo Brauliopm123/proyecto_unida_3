@@ -1,13 +1,13 @@
 import { useState } from "react";
 import API from "../services/api";
 
-function Progreso() {
+function Progreso(){
 
   const [data, setData] = useState({
-    usuario_id: "",
-    titulo_id: "",
-    episodio_actual: "",
-    estado_personal: ""
+    usuario_id:"",
+    titulo_id:"",
+    episodio_actual:"",
+    estado_personal:"viendo"
   });
 
   const handleChange = (e) => {
@@ -17,46 +17,22 @@ function Progreso() {
     });
   };
 
-  const registrarProgreso = () => {
+  const guardar = () => {
     API.post("/progreso", data)
-      .then(res => {
-        alert("Progreso registrado");
-      })
+      .then(() => alert("Progreso guardado"))
       .catch(err => console.log(err));
   };
 
   return (
-    <div>
+    <div className="form">
 
-      <h2>Registrar Progreso</h2>
+      <h2>Actualizar Progreso</h2>
 
-      <input
-        name="usuario_id"
-        placeholder="ID Usuario"
-        onChange={handleChange}
-      />
+      <input name="usuario_id" placeholder="ID Usuario" onChange={handleChange}/>
+      <input name="titulo_id" placeholder="ID Título" onChange={handleChange}/>
+      <input name="episodio_actual" placeholder="Episodio actual" onChange={handleChange}/>
 
-      <input
-        name="titulo_id"
-        placeholder="ID Título"
-        onChange={handleChange}
-      />
-
-      <input
-        name="episodio_actual"
-        placeholder="Episodio actual"
-        onChange={handleChange}
-      />
-
-      <input
-        name="estado_personal"
-        placeholder="Estado"
-        onChange={handleChange}
-      />
-
-      <button onClick={registrarProgreso}>
-        Guardar
-      </button>
+      <button onClick={guardar}>Guardar</button>
 
     </div>
   );

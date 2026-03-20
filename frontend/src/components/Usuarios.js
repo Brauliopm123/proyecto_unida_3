@@ -1,55 +1,37 @@
 import { useState } from "react";
 import API from "../services/api";
 
-function Usuarios() {
+function Usuarios(){
 
-  const [usuario, setUsuario] = useState({
-    nombre: "",
-    correo: "",
-    contraseña: ""
+  const [data, setData] = useState({
+    nombre:"",
+    correo:"",
+    contraseña:""
   });
 
   const handleChange = (e) => {
-    setUsuario({
-      ...usuario,
+    setData({
+      ...data,
       [e.target.name]: e.target.value
     });
   };
 
-  const registrarUsuario = () => {
-    API.post("/usuarios", usuario)
-      .then(res => {
-        alert("Usuario registrado");
-      })
+  const registrar = () => {
+    API.post("/usuarios", data)
+      .then(() => alert("Usuario registrado"))
       .catch(err => console.log(err));
   };
 
   return (
-    <div>
+    <div className="form">
 
       <h2>Registro de Usuario</h2>
 
-      <input
-        name="nombre"
-        placeholder="Nombre"
-        onChange={handleChange}
-      />
+      <input name="nombre" placeholder="Nombre" onChange={handleChange}/>
+      <input name="correo" placeholder="Correo" onChange={handleChange}/>
+      <input name="contraseña" placeholder="Contraseña" onChange={handleChange}/>
 
-      <input
-        name="correo"
-        placeholder="Correo"
-        onChange={handleChange}
-      />
-
-      <input
-        name="contraseña"
-        placeholder="Contraseña"
-        onChange={handleChange}
-      />
-
-      <button onClick={registrarUsuario}>
-        Registrar
-      </button>
+      <button onClick={registrar}>Registrar</button>
 
     </div>
   );
