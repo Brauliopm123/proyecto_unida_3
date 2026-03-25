@@ -26,3 +26,31 @@ def eliminar_usuario(id: int, db: Session = Depends(get_db)):
     db.delete(usuario)
     db.commit()
     return {"mensaje": "usuario eliminado"}
+
+from fastapi import HTTPException
+
+@router.get("/{id}")
+def obtener_usuario(id: int, db: Session = Depends(get_db)):
+
+    usuario = db.query(Usuario).filter(Usuario.id == id).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return usuario
+
+@router.put("/{id}")
+def actualizar_usuario(id: int, data: UsuarioCreate, db: Session = Depends(get_db)):
+
+    usuario = db.query(Usuario).filter(Usuario.id == id).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    usuario.nombre = data.nombre
+    usuario.correo = data.correo
+    usuario.contraseña = data.contraseña
+
+    db.commit()
+
+    return {"mensaje": "Usuario actualizado"}
