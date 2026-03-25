@@ -23,3 +23,35 @@ def obtener_titulos(db: Session = Depends(get_db)):
 @router.get("/{id}")
 def obtener_titulo(id: int, db: Session = Depends(get_db)):
     return db.query(Titulo).filter(Titulo.id == id).first()
+
+@router.put("/{id}")
+def actualizar_titulo(id: int, data: TituloCreate, db: Session = Depends(get_db)):
+
+    titulo = db.query(Titulo).filter(Titulo.id == id).first()
+
+    if not titulo:
+        return {"error": "Título no encontrado"}
+
+    titulo.titulo = data.titulo
+    titulo.tipo = data.tipo
+    titulo.genero = data.genero
+    titulo.estado = data.estado
+    titulo.total_episodios = data.total_episodios
+    titulo.sinopsis = data.sinopsis
+
+    db.commit()
+
+    return {"mensaje": "Título actualizado"}
+
+@router.delete("/{id}")
+def eliminar_titulo(id: int, db: Session = Depends(get_db)):
+
+    titulo = db.query(Titulo).filter(Titulo.id == id).first()
+
+    if not titulo:
+        return {"error": "Título no encontrado"}
+
+    db.delete(titulo)
+    db.commit()
+
+    return {"mensaje": "Título eliminado"}
