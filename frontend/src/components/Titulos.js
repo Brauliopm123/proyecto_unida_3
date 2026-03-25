@@ -96,7 +96,7 @@ function Titulos(){
       {/* FORMULARIO */}
       <div className="form">
 
-        <h2>🎬 Catálogo</h2>
+        <h2>Catálogo</h2>
 
         <input
           name="titulo"
@@ -156,7 +156,7 @@ function Titulos(){
       </div>
 
       {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}>📺 Catálogo</h3>
+      <h3 style={{paddingLeft:"20px"}}>Catálogo</h3>
 
       <div className="grid">
 
