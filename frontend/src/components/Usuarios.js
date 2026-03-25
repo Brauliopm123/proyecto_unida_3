@@ -90,7 +90,7 @@ function Usuarios(){
       {/* FORMULARIO */}
       <div className="form">
 
-        <h2>👤 Usuarios</h2>
+        <h2>Usuarios</h2>
 
         <input
           name="nombre"
@@ -132,7 +132,7 @@ function Usuarios(){
       </div>
 
       {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}>📋 Lista de usuarios</h3>
+      <h3 style={{paddingLeft:"20px"}}>Lista de usuarios</h3>
 
       <div className="grid">
 
