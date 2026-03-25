@@ -94,7 +94,7 @@ function Progreso(){
       {/* FORMULARIO */}
       <div className="form">
 
-        <h2>📺 Progreso</h2>
+        <h2>Progreso</h2>
 
         <input
           name="usuario_id"
@@ -147,7 +147,7 @@ function Progreso(){
       </div>
 
       {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}>📊 Historial</h3>
+      <h3 style={{paddingLeft:"20px"}}>Historial</h3>
 
       <div className="grid">
 
