@@ -33,9 +33,3 @@ def actualizar_progreso(id: int, data: ProgresoCreate, db: Session = Depends(get
 @router.delete("/{id}")
 def eliminar_progreso(id: int):
     return {"mensaje": f"Progreso {id} eliminado"}
-
-@router.get("/")
-def listar_progreso(usuario_id: int | None = None):
-    if usuario_id:
-        return {"mensaje": f"Progreso del usuario {usuario_id}"}
-    return {"mensaje": "Lista de progreso"}
