@@ -4,6 +4,7 @@ CREATE TABLE usuarios (
     correo VARCHAR(150) NOT NULL UNIQUE,
     contraseña VARCHAR(255) NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    rol ENUM('admin','usuario') DEFAULT 'usuario'
 );
 
 CREATE TABLE titulos (

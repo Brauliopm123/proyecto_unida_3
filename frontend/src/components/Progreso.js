@@ -6,6 +6,7 @@ function Progreso(){
   // ESTADOS
   const [lista, setLista] = useState([]);
   const [titulos, setTitulos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   const [form, setForm] = useState({
     id: "",
@@ -17,7 +18,7 @@ function Progreso(){
 
   const [editando, setEditando] = useState(false);
 
-  // MANEJO DE INPUTS
+  // MANEJO INPUTS
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -25,14 +26,21 @@ function Progreso(){
     });
   };
 
-  // OBTENER TITULOS (para mostrar nombres)
+  // OBTENER TITULOS
   useEffect(() => {
     API.get("/titulos")
       .then(res => setTitulos(res.data))
       .catch(err => console.log(err));
   }, []);
 
-  // OBTENER PROGRESO POR USUARIO
+  // OBTENER USUARIOS
+  useEffect(() => {
+    API.get("/usuarios")
+      .then(res => setUsuarios(res.data))
+      .catch(err => console.log(err));
+  }, []);
+
+  // OBTENER PROGRESO
   const obtenerProgreso = () => {
     if(!form.usuario_id) return;
 
@@ -45,13 +53,19 @@ function Progreso(){
     obtenerProgreso();
   }, [form.usuario_id]);
 
-  // FUNCION PARA MOSTRAR NOMBRE DEL ANIME
+  // MOSTRAR NOMBRE TITULO
   const obtenerNombreTitulo = (id) => {
     const titulo = titulos.find(t => t.id === id);
     return titulo ? titulo.titulo : "Desconocido";
   };
 
-  // CREAR PROGRESO
+  // MOSTRAR NOMBRE USUARIO
+  const obtenerNombreUsuario = (id) => {
+    const usuario = usuarios.find(u => u.id === id);
+    return usuario ? usuario.nombre : "Desconocido";
+  };
+
+  // CREAR
   const crearProgreso = () => {
     API.post("/progreso", form)
       .then(() => {
@@ -62,13 +76,13 @@ function Progreso(){
       .catch(err => console.log(err));
   };
 
-  // SELECCIONAR PARA EDITAR
+  // EDITAR
   const seleccionarProgreso = (p) => {
     setForm(p);
     setEditando(true);
   };
 
-  // ACTUALIZAR PROGRESO
+  // ACTUALIZAR
   const actualizarProgreso = () => {
     API.put(`/progreso/${form.id}`, form)
       .then(() => {
@@ -79,7 +93,7 @@ function Progreso(){
       .catch(err => console.log(err));
   };
 
-  // ELIMINAR PROGRESO
+  // ELIMINAR
   const eliminarProgreso = (id) => {
     if(!window.confirm("¿Eliminar progreso?")) return;
 
@@ -91,7 +105,7 @@ function Progreso(){
       .catch(err => console.log(err));
   };
 
-  // LIMPIAR FORMULARIO
+  // LIMPIAR
   const limpiarForm = () => {
     setForm({
       id: "",
@@ -109,16 +123,23 @@ function Progreso(){
       {/* FORMULARIO */}
       <div className="form">
 
-        <h2>Progreso</h2>
+        <h2> Progreso</h2>
 
-        <input
+        {/* SELECT USUARIOS */}
+        <select
           name="usuario_id"
-          placeholder="ID Usuario"
           value={form.usuario_id}
           onChange={handleChange}
-        />
+        >
+          <option value="">Selecciona un usuario</option>
+          {usuarios.map(u => (
+            <option key={u.id} value={u.id}>
+              {u.nombre}
+            </option>
+          ))}
+        </select>
 
-        {/* SELECT DINAMICO DE TITULOS */}
+        {/* SELECT TITULOS */}
         <select
           name="titulo_id"
           value={form.titulo_id}
@@ -146,7 +167,7 @@ function Progreso(){
         >
           <option value="viendo">Viendo</option>
           <option value="completado">Completado</option>
-          <option value="pausa">Pausa</option>
+          <option value="en_pausa">Pausa</option>
           <option value="abandonado">Abandonado</option>
         </select>
 
@@ -169,7 +190,7 @@ function Progreso(){
       </div>
 
       {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}>Historial</h3>
+      <h3 style={{paddingLeft:"20px"}}> Historial</h3>
 
       <div className="grid">
 
@@ -179,8 +200,11 @@ function Progreso(){
           lista.map(p => (
             <div className="card" key={p.id}>
 
-              <p><b>Usuario:</b> {p.usuario_id}</p>
+              {/* YA NO SON IDS */}
+              <p><b>Usuario:</b> {obtenerNombreUsuario(p.usuario_id)}</p>
+
               <p><b>Título:</b> {obtenerNombreTitulo(p.titulo_id)}</p>
+
               <p><b>Episodio:</b> {p.episodio_actual}</p>
               <p><b>Estado:</b> {p.estado_personal}</p>
 

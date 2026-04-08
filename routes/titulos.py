@@ -1,23 +1,39 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from models.titulo import Titulo
 from schemas.titulo_schema import TituloCreate
+from dependencies import solo_admin
 
 router = APIRouter()
 
 @router.post("/")
-def crear_titulo(titulo: TituloCreate, db: Session = Depends(get_db)):
-    nuevo = Titulo(**titulo.dict())
+def crear_titulo(
+    data: TituloCreate,
+    db: Session = Depends(get_db),
+    usuario = Depends(solo_admin)
+):
+    nuevo = Titulo(**data.dict())
     db.add(nuevo)
     db.commit()
     db.refresh(nuevo)
     return nuevo
 
-
 @router.get("/")
-def obtener_titulos(db: Session = Depends(get_db)):
-    return db.query(Titulo).all()
+def obtener_titulos(
+    genero: str = Query(None),
+    estado: str = Query(None),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Titulo)
+
+    if genero:
+        query = query.filter(Titulo.genero == genero)
+
+    if estado:
+        query = query.filter(Titulo.estado == estado)
+
+    return query.all()
 
 
 @router.get("/{id}")

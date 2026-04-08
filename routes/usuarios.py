@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from dependencies import get_db
 from models.usuario import Usuario
 from schemas.usuario_schema import UsuarioCreate
+from dependencies import solo_admin
 
 router = APIRouter()
 
@@ -21,13 +23,20 @@ def obtener_usuarios(db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}")
-def eliminar_usuario(id: int, db: Session = Depends(get_db)):
+def eliminar_usuario(
+    id: int,
+    db: Session = Depends(get_db),
+    usuario_actual = Depends(solo_admin)
+):
     usuario = db.query(Usuario).filter(Usuario.id == id).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
     db.delete(usuario)
     db.commit()
-    return {"mensaje": "usuario eliminado"}
 
-from fastapi import HTTPException
+    return {"mensaje": "Usuario eliminado"}
 
 @router.get("/{id}")
 def obtener_usuario(id: int, db: Session = Depends(get_db)):
