@@ -1,265 +1,202 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 
-function Titulos(){
+function Titulos({ usuario }) {
 
-  // LISTA
   const [titulos, setTitulos] = useState([]);
+  const [filtrados, setFiltrados] = useState([]);
 
-  // FORMULARIO
+  const [editando, setEditando] = useState(null);
+
   const [form, setForm] = useState({
-    id: "",
     titulo: "",
     tipo: "anime",
     genero: "",
     estado: "en_emision",
-    total_episodios: "",
+    total_episodios: 0,
     sinopsis: ""
   });
 
-  // FILTROS
-  const [filtros, setFiltros] = useState({
-    genero: "",
-    estado: ""
-  });
+  //  FILTROS
+  const [busqueda, setBusqueda] = useState("");
+  const [filtrogenero, setFiltrogenero] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("");
 
-  const [editando, setEditando] = useState(false);
-
-  // =========================
-  // MANEJO DE INPUTS
-  // =========================
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+  const headers = {
+    "usuario-id": usuario.id
   };
 
-  const handleFiltroChange = (e) => {
-    setFiltros({
-      ...filtros,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  // =========================
-  // OBTENER TITULOS (CON FILTROS)
-  // =========================
-  const obtenerTitulos = () => {
-
-    let url = "/titulos";
-    const params = [];
-
-    if (filtros.genero) params.push(`genero=${filtros.genero}`);
-    if (filtros.estado) params.push(`estado=${filtros.estado}`);
-
-    if (params.length > 0) {
-      url += "?" + params.join("&");
-    }
-
-    API.get(url)
-      .then(res => setTitulos(res.data))
-      .catch(err => console.log(err));
+  //  Cargar datos
+  const cargar = async () => {
+    const res = await API.get("/titulos/");
+    setTitulos(res.data);
+    setFiltrados(res.data);
   };
 
   useEffect(() => {
-    obtenerTitulos();
+    cargar();
   }, []);
 
-  // =========================
-  // CRUD
-  // =========================
+  //  Aplicar filtros automáticamente
+  useEffect(() => {
+    let data = titulos;
 
-  const crearTitulo = () => {
-    API.post("/titulos", form)
-      .then(() => {
-        alert("Título creado");
-        obtenerTitulos();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
-  };
- // Seleccionar para editar
-  const seleccionarTitulo = (t) => {
-    setForm(t);
-    setEditando(true);
-  };
-// Actualizar título
-  const actualizarTitulo = () => {
-    API.put(`/titulos/${form.id}`, form)
-      .then(() => {
-        alert("Título actualizado");
-        obtenerTitulos();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
-  };
- // Eliminar título
-  const eliminarTitulo = (id) => {
-    if(!window.confirm("¿Eliminar título?")) return;
+    if (busqueda) {
+      data = data.filter(t =>
+        t.titulo.toLowerCase().includes(busqueda.toLowerCase())
+      );
+    }
 
-    API.delete(`/titulos/${id}`)
-      .then(() => {
-        alert("Título eliminado");
-        obtenerTitulos();
-      })
-      .catch(err => console.log(err));
-  };
- // Limpiar formulario
-  const limpiarForm = () => {
+    if (filtrogenero) {
+      data = data.filter(t =>
+        t.genero.toLowerCase().includes(filtrogenero.toLowerCase())
+      );
+    }
+
+    if (filtroEstado) {
+      data = data.filter(t => t.estado === filtroEstado);
+    }
+
+    setFiltrados(data);
+  }, [busqueda, filtrogenero, filtroEstado, titulos]);
+
+  //  Guardar
+  const guardar = async () => {
+    if (editando) {
+      await API.put(`/titulos/${editando}`, form, { headers });
+    } else {
+      await API.post("/titulos/", form, { headers });
+    }
+
     setForm({
-      id: "",
       titulo: "",
       tipo: "anime",
       genero: "",
       estado: "en_emision",
-      total_episodios: "",
+      total_episodios: 0,
       sinopsis: ""
     });
-    setEditando(false);
+
+    setEditando(null);
+    cargar();
   };
 
-  // =========================
-  // UI
-  // =========================
+  //  Editar
+  const editar = (t) => {
+    setEditando(t.id);
+    setForm(t);
+  };
+
+  //  Eliminar
+  const eliminar = async (id) => {
+    if (!window.confirm("¿Eliminar título?")) return;
+
+    await API.delete(`/titulos/${id}`, { headers });
+    cargar();
+  };
+
   return (
     <div>
 
-      {/* ===================== */}
-      {/* FILTROS */}
-      {/* ===================== */}
-      <div className="form">
+      {/*  FILTROS */}
+      <h4>Buscar y filtrar</h4>
 
-        <h3>Filtros</h3>
+      <input
+        placeholder="Buscar por nombre"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+      />
 
-        <input
-          name="genero"
-          placeholder="Filtrar por género"
-          value={filtros.genero}
-          onChange={handleFiltroChange}
-        />
+      <select
+        value={filtrogenero}
+        onChange={(e) => setFiltrogenero(e.target.value)}
+      >
+        <option value="">Todos los géneros</option>
+        <option value="accion">Acción</option>
+        <option value="romance">Romance</option>
+        <option value="comedia">Comedia</option>
+        <option value="shonen">shonen</option>
+      </select>
 
-        <select
-          name="estado"
-          value={filtros.estado}
-          onChange={handleFiltroChange}
-        >
-          <option value="">Todos los estados</option>
-          <option value="en_emision">En emisión</option>
-          <option value="finalizado">Finalizado</option>
-          <option value="pendiente">Pendiente</option>
-        </select>
+      <select
+        value={filtroEstado}
+        onChange={(e) => setFiltroEstado(e.target.value)}
+      >
+        <option value="">Todos los estados</option>
+        <option value="en_emision">En emisión</option>
+        <option value="finalizado">Finalizado</option>
+        <option value="pendiente">Pendiente</option>
+      </select>
 
-        <button onClick={obtenerTitulos}>
-          Aplicar filtros
-        </button>
+      {/*  FORM ADMIN */}
+      {usuario.rol === "admin" && (
+        <>
+          <h4>{editando ? "Editar título" : "Crear título"}</h4>
 
-        <button onClick={() => {
-          setFiltros({genero:"", estado:""});
-          obtenerTitulos();
-        }}>
-          Limpiar filtros
-        </button>
+          <input placeholder="Título"
+            value={form.titulo}
+            onChange={(e) => setForm({...form, titulo: e.target.value})}
+          />
 
-      </div>
+          <select
+            value={form.tipo}
+            onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+          >
+            <option value="anime">Anime</option>
+            <option value="manga">Manga</option>
+          </select>
 
-      {/* ===================== */}
-      {/* FORMULARIO */}
-      {/* ===================== */}
-      <div className="form">
+          <input placeholder="Género"
+            value={form.genero}
+            onChange={(e) => setForm({...form, genero: e.target.value})}
+          />
 
-        <h2>Catálogo</h2>
+          <select
+            value={form.estado}
+            onChange={(e) => setForm({ ...form, estado: e.target.value })}
+          >
+            <option value="en_emision">En emisión</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="pendiente">Pendiente</option>
+          </select>
 
-        <input
-          name="titulo"
-          placeholder="Nombre del título"
-          value={form.titulo}
-          onChange={handleChange}
-        />
+          <input placeholder="Total episodios"
+            value={form.total_episodios}
+            onChange={(e) => setForm({...form, total_episodios: e.target.value})}
+          />
 
-        <select name="tipo" value={form.tipo} onChange={handleChange}>
-          <option value="anime">Anime</option>
-          <option value="manga">Manga</option>
-        </select>
+          <input placeholder="Sinopsis"
+            value={form.sinopsis}
+            onChange={(e) => setForm({...form, sinopsis: e.target.value})}
+          />
 
-        <input
-          name="genero"
-          placeholder="Género"
-          value={form.genero}
-          onChange={handleChange}
-        />
-
-        <select name="estado" value={form.estado} onChange={handleChange}>
-          <option value="en_emision">En emisión</option>
-          <option value="finalizado">Finalizado</option>
-          <option value="pendiente">Pendiente</option>
-        </select>
-
-        <input
-          name="total_episodios"
-          placeholder="Total episodios"
-          value={form.total_episodios}
-          onChange={handleChange}
-        />
-
-        <input
-          name="sinopsis"
-          placeholder="Sinopsis"
-          value={form.sinopsis}
-          onChange={handleChange}
-        />
-
-        {editando ? (
-          <>
-            <button onClick={actualizarTitulo}>
-              Actualizar
-            </button>
-
-            <button onClick={limpiarForm}>
-              Cancelar
-            </button>
-          </>
-        ) : (
-          <button onClick={crearTitulo}>
-            Agregar
+          <button onClick={guardar}>
+            {editando ? "Actualizar" : "Crear"}
           </button>
-        )}
+        </>
+      )}
 
-      </div>
+      {/*  LISTA */}
+      <h4>Lista de títulos</h4>
 
-      {/* ===================== */}
-      {/* LISTA */}
-      {/* ===================== */}
-      <h3 style={{paddingLeft:"20px"}}> Catálogo</h3>
+      {filtrados.map(t => (
+        <div key={t.id} className="card">
 
-      <div className="grid">
+          <div>
+            <b>{t.titulo}</b> ({t.tipo}) <br />
+            {t.genero} <br />
+            Estado: {t.estado}
+          </div>
 
-        {titulos.length === 0 ? (
-          <p>No hay resultados</p>
-        ) : (
-          titulos.map(t => (
-            <div className="card" key={t.id}>
-
-              <h3>{t.titulo}</h3>
-
-              <p><b>Tipo:</b> {t.tipo}</p>
-              <p><b>Género:</b> {t.genero}</p>
-              <p><b>Estado:</b> {t.estado}</p>
-              <p><b>Episodios:</b> {t.total_episodios}</p>
-
-              <button onClick={() => seleccionarTitulo(t)}>
-                Editar
-              </button>
-
-              <button onClick={() => eliminarTitulo(t.id)}>
-                Eliminar
-              </button>
-
+          {usuario.rol === "admin" && (
+            <div>
+              <button onClick={() => editar(t)}>Editar</button>
+              <button className="delete" onClick={() => eliminar(t.id)}>Eliminar</button>
             </div>
-          ))
-        )}
+          )}
 
-      </div>
+        </div>
+      ))}
 
     </div>
   );

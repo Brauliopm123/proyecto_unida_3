@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from dependencies import get_db
+from dependencies import get_db, get_usuario_actual
 from models.progreso import Progreso
+from models.titulo import Titulo
 from schemas.progreso_schema import ProgresoCreate
 
 router = APIRouter()
@@ -16,8 +17,23 @@ def registrar_progreso(data: ProgresoCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/usuario/{usuario_id}")
-def progreso_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    return db.query(Progreso).filter(Progreso.usuario_id == usuario_id).all()
+def obtener_progreso(usuario_id: int, db: Session = Depends(get_db)):
+    resultados = db.query(Progreso, Titulo).join(
+        Titulo, Progreso.titulo_id == Titulo.id
+    ).filter(
+        Progreso.usuario_id == usuario_id
+    ).all()
+
+    return [
+        {
+            "id": p.id,
+            "titulo_id": p.titulo_id,
+            "titulo": t.titulo,  # 🔥 AQUÍ VA EL NOMBRE
+            "episodio_actual": p.episodio_actual,
+            "estado_personal": p.estado_personal
+        }
+        for p, t in resultados
+    ]
 
 
 @router.put("/{id}")
@@ -31,5 +47,17 @@ def actualizar_progreso(id: int, data: ProgresoCreate, db: Session = Depends(get
     return progreso
 
 @router.delete("/{id}")
-def eliminar_progreso(id: int):
-    return {"mensaje": f"Progreso {id} eliminado"}
+def eliminar_progreso(
+    id: int,
+    db: Session = Depends(get_db),
+    usuario = Depends(get_usuario_actual)
+):
+    progreso = db.query(Progreso).filter(Progreso.id == id).first()
+
+    if not progreso:
+        raise HTTPException(status_code=404, detail="No encontrado")
+
+    db.delete(progreso)
+    db.commit()
+
+    return {"mensaje": "Eliminado correctamente"}

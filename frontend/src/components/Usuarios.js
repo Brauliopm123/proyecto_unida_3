@@ -1,159 +1,178 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 
-function Usuarios(){
+function Usuarios({ usuario }) {
 
   const [usuarios, setUsuarios] = useState([]);
+  const [editando, setEditando] = useState(null);
 
   const [form, setForm] = useState({
-    id: "",
     nombre: "",
     correo: "",
-    contraseña: ""
+    contraseña: "",
+    rol: "usuario"
   });
 
-  const [editando, setEditando] = useState(false);
+  const headers = {
+    "usuario-id": usuario.id
+  };
 
-  // Obtener usuarios
-  const obtenerUsuarios = () => {
-    API.get("/usuarios")
-      .then(res => setUsuarios(res.data))
-      .catch(err => console.log(err));
+  // 🔄 Cargar usuarios
+  const cargar = async () => {
+    try {
+      const res = await API.get("/usuarios/");
+      setUsuarios(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    obtenerUsuarios();
+    cargar();
   }, []);
 
-  // Manejar inputs
-  const handleChange = (e) => {
+  // 💾 Guardar (crear / editar)
+  const guardar = async () => {
+    try {
+      let data = { ...form };
+
+      // 🔥 NO enviar contraseña si está vacía
+      if (!data.contraseña) {
+        delete data.contraseña;
+      }
+
+      if (editando) {
+        await API.put(`/usuarios/${editando}`, data, { headers });
+        alert("Usuario actualizado");
+      } else {
+        await API.post("/usuarios/", data);
+        alert("Usuario creado");
+      }
+
+      // Reset form
+      setForm({
+        nombre: "",
+        correo: "",
+        contraseña: "",
+        rol: "usuario"
+      });
+
+      setEditando(null);
+
+      cargar(); // 🔥 refrescar lista
+
+    } catch (error) {
+      console.log(error.response?.data);
+    }
+  };
+
+  // ✏️ Editar
+  const editar = (u) => {
+    setEditando(u.id);
+
     setForm({
-      ...form,
-      [e.target.name]: e.target.value
+      nombre: u.nombre,
+      correo: u.correo,
+      contraseña: "", // 🔥 no traer contraseña
+      rol: u.rol
     });
   };
 
-  // Crear usuario
-  const crearUsuario = () => {
-    API.post("/usuarios", form)
-      .then(() => {
-        alert("Usuario creado");
-        obtenerUsuarios();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
+  // ❌ Eliminar
+  const eliminar = async (id) => {
+    if (!window.confirm("¿Eliminar usuario?")) return;
+
+    try {
+      await API.delete(`/usuarios/${id}`, { headers });
+      alert("Usuario eliminado");
+
+      cargar(); // 🔥 refrescar lista
+
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  // Preparar edición
-  const seleccionarUsuario = (u) => {
-    setForm(u);
-    setEditando(true);
-  };
-
-  // Actualizar usuario
-  const actualizarUsuario = () => {
-    API.put(`/usuarios/${form.id}`, form)
-      .then(() => {
-        alert("Usuario actualizado");
-        obtenerUsuarios();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
-  };
-
-  // Eliminar usuario
-  const eliminarUsuario = (id) => {
-    if(!window.confirm("¿Eliminar usuario?")) return;
-
-    API.delete(`/usuarios/${id}`)
-      .then(() => {
-        alert("Usuario eliminado");
-        obtenerUsuarios();
-      })
-      .catch(err => console.log(err));
-  };
-
-  // Limpiar formulario
-  const limpiarForm = () => {
+  // ❌ Cancelar edición
+  const cancelar = () => {
+    setEditando(null);
     setForm({
-      id: "",
       nombre: "",
       correo: "",
-      contraseña: ""
+      contraseña: "",
+      rol: "usuario"
     });
-    setEditando(false);
   };
 
   return (
     <div>
 
+      <h4>
+        {editando ? `Editando usuario ID: ${editando}` : "Crear usuario"}
+      </h4>
+
       {/* FORMULARIO */}
-      <div className="form">
+      <input
+        placeholder="Nombre"
+        value={form.nombre}
+        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+      />
 
-        <h2>Usuarios</h2>
+      <input
+        placeholder="Correo"
+        value={form.correo}
+        onChange={(e) => setForm({ ...form, correo: e.target.value })}
+      />
 
-        <input
-          name="nombre"
-          placeholder="Nombre"
-          value={form.nombre}
-          onChange={handleChange}
-        />
+      <input
+        type="password"
+        placeholder="Contraseña"
+        value={form.contraseña}
+        onChange={(e) => setForm({ ...form, contraseña: e.target.value })}
+      />
 
-        <input
-          name="correo"
-          placeholder="Correo"
-          value={form.correo}
-          onChange={handleChange}
-        />
+      <select
+        value={form.rol}
+        onChange={(e) => setForm({ ...form, rol: e.target.value })}
+      >
+        <option value="usuario">Usuario</option>
+        <option value="admin">Admin</option>
+      </select>
 
-        <input
-          name="contraseña"
-          placeholder="Contraseña"
-          value={form.contraseña}
-          onChange={handleChange}
-        />
+      <button onClick={guardar}>
+        {editando ? "Actualizar" : "Crear"}
+      </button>
 
-        {editando ? (
-          <>
-            <button onClick={actualizarUsuario}>
-              Actualizar
-            </button>
-
-            <button onClick={limpiarForm}>
-              Cancelar
-            </button>
-          </>
-        ) : (
-          <button onClick={crearUsuario}>
-            Registrar
-          </button>
-        )}
-
-      </div>
+      {editando && (
+        <button onClick={cancelar}>
+          Cancelar
+        </button>
+      )}
 
       {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}>Lista de usuarios</h3>
+      <h4>Lista de usuarios</h4>
 
-      <div className="grid">
+      {usuarios.map(u => (
+        <div key={u.id} className="card">
 
-        {usuarios.map(u => (
-          <div className="card" key={u.id}>
+          <div>
+            <b>{u.nombre}</b> <br />
+            {u.correo} <br />
+            Rol: {u.rol}
+          </div>
 
-            <h3>{u.nombre}</h3>
-            <p>{u.correo}</p>
-
-            <button onClick={() => seleccionarUsuario(u)}>
-              Editar
-            </button>
-
-            <button onClick={() => eliminarUsuario(u.id)}>
+          <div>
+            <button onClick={() => editar(u)}>Editar</button>
+            <button
+              className="delete"
+              onClick={() => eliminar(u.id)}
+            >
               Eliminar
             </button>
-
           </div>
-        ))}
 
-      </div>
+        </div>
+      ))}
 
     </div>
   );

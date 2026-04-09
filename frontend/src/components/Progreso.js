@@ -1,226 +1,167 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import API from "../services/api";
 
-function Progreso(){
+function Progreso({ usuario }) {
 
-  // ESTADOS
-  const [lista, setLista] = useState([]);
+  const [progreso, setProgreso] = useState([]);
   const [titulos, setTitulos] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
+  const [editando, setEditando] = useState(null);
 
   const [form, setForm] = useState({
-    id: "",
-    usuario_id: "",
     titulo_id: "",
-    episodio_actual: "",
+    episodio_actual: 1,
     estado_personal: "viendo"
   });
 
-  const [editando, setEditando] = useState(false);
-
-  // MANEJO INPUTS
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+  const headers = {
+    "usuario-id": usuario.id
   };
 
-  // OBTENER TITULOS
+  // 🔥 useCallback para evitar warning
+  const cargar = useCallback(async () => {
+    try {
+      const resProgreso = await API.get(`/progreso/usuario/${usuario.id}`);
+      setProgreso(resProgreso.data);
+
+      const resTitulos = await API.get("/titulos");
+      setTitulos(resTitulos.data);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }, [usuario.id]);
+
+  // 🔄 Ejecutar carga inicial
   useEffect(() => {
-    API.get("/titulos")
-      .then(res => setTitulos(res.data))
-      .catch(err => console.log(err));
-  }, []);
+    cargar();
+  }, [cargar]); // 🔥 ya no hay warning
 
-  // OBTENER USUARIOS
-  useEffect(() => {
-    API.get("/usuarios")
-      .then(res => setUsuarios(res.data))
-      .catch(err => console.log(err));
-  }, []);
+  // 💾 Guardar (crear o editar)
+  const guardar = async () => {
+    try {
 
-  // OBTENER PROGRESO
-  const obtenerProgreso = () => {
-    if(!form.usuario_id) return;
+      const data = {
+        usuario_id: usuario.id,
+        titulo_id: Number(form.titulo_id),
+        episodio_actual: Number(form.episodio_actual),
+        estado_personal: form.estado_personal
+      };
 
-    API.get(`/progreso/usuario/${form.usuario_id}`)
-      .then(res => setLista(res.data))
-      .catch(err => console.log(err));
-  };
-
-  useEffect(() => {
-    obtenerProgreso();
-  }, [form.usuario_id]);
-
-  // MOSTRAR NOMBRE TITULO
-  const obtenerNombreTitulo = (id) => {
-    const titulo = titulos.find(t => t.id === id);
-    return titulo ? titulo.titulo : "Desconocido";
-  };
-
-  // MOSTRAR NOMBRE USUARIO
-  const obtenerNombreUsuario = (id) => {
-    const usuario = usuarios.find(u => u.id === id);
-    return usuario ? usuario.nombre : "Desconocido";
-  };
-
-  // CREAR
-  const crearProgreso = () => {
-    API.post("/progreso", form)
-      .then(() => {
-        alert("Progreso registrado");
-        obtenerProgreso();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
-  };
-
-  // EDITAR
-  const seleccionarProgreso = (p) => {
-    setForm(p);
-    setEditando(true);
-  };
-
-  // ACTUALIZAR
-  const actualizarProgreso = () => {
-    API.put(`/progreso/${form.id}`, form)
-      .then(() => {
+      if (editando) {
+        await API.put(`/progreso/${editando}`, data, { headers });
         alert("Progreso actualizado");
-        obtenerProgreso();
-        limpiarForm();
-      })
-      .catch(err => console.log(err));
+      } else {
+        await API.post("/progreso", data, { headers });
+        alert("Progreso guardado");
+      }
+
+      setForm({
+        titulo_id: "",
+        episodio_actual: 1,
+        estado_personal: "viendo"
+      });
+
+      setEditando(null);
+
+      cargar(); // 🔥 refresca automáticamente
+
+    } catch (error) {
+      console.log(error.response?.data);
+    }
   };
 
-  // ELIMINAR
-  const eliminarProgreso = (id) => {
-    if(!window.confirm("¿Eliminar progreso?")) return;
-
-    API.delete(`/progreso/${id}`)
-      .then(() => {
-        alert("Progreso eliminado");
-        obtenerProgreso();
-      })
-      .catch(err => console.log(err));
-  };
-
-  // LIMPIAR
-  const limpiarForm = () => {
+  // ✏️ Editar
+  const editar = (p) => {
+    setEditando(p.id);
     setForm({
-      id: "",
-      usuario_id: "",
-      titulo_id: "",
-      episodio_actual: "",
-      estado_personal: "viendo"
+      titulo_id: p.titulo_id,
+      episodio_actual: p.episodio_actual,
+      estado_personal: p.estado_personal
     });
-    setEditando(false);
+  };
+
+  // ❌ Eliminar
+  const eliminar = async (id) => {
+    if (!window.confirm("¿Eliminar progreso?")) return;
+
+    try {
+      await API.delete(`/progreso/${id}`, { headers });
+
+      alert("Progreso eliminado");
+
+      cargar(); // 🔥 refresca correctamente
+
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <div>
 
-      {/* FORMULARIO */}
-      <div className="form">
+      <h4>{editando ? "Editar progreso" : "Registrar progreso"}</h4>
 
-        <h2> Progreso</h2>
+      {/* SELECT TITULOS */}
+      <select
+        value={form.titulo_id}
+        onChange={(e) =>
+          setForm({ ...form, titulo_id: e.target.value })
+        }
+      >
+        <option value="">Selecciona un título</option>
+        {titulos.map(t => (
+          <option key={t.id} value={t.id}>
+            {t.titulo}
+          </option>
+        ))}
+      </select>
 
-        {/* SELECT USUARIOS */}
-        <select
-          name="usuario_id"
-          value={form.usuario_id}
-          onChange={handleChange}
-        >
-          <option value="">Selecciona un usuario</option>
-          {usuarios.map(u => (
-            <option key={u.id} value={u.id}>
-              {u.nombre}
-            </option>
-          ))}
-        </select>
+      {/* EPISODIO */}
+      <input
+        placeholder="Episodio actual"
+        value={form.episodio_actual}
+        onChange={(e) =>
+          setForm({ ...form, episodio_actual: e.target.value })
+        }
+      />
 
-        {/* SELECT TITULOS */}
-        <select
-          name="titulo_id"
-          value={form.titulo_id}
-          onChange={handleChange}
-        >
-          <option value="">Selecciona un título</option>
-          {titulos.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.titulo}
-            </option>
-          ))}
-        </select>
+      {/* ESTADO */}
+      <select
+        value={form.estado_personal}
+        onChange={(e) =>
+          setForm({ ...form, estado_personal: e.target.value })
+        }
+      >
+        <option value="viendo">Viendo</option>
+        <option value="completado">Completado</option>
+        <option value="pausa">En pausa</option>
+        <option value="abandonado">Abandonado</option>
+      </select>
 
-        <input
-          name="episodio_actual"
-          placeholder="Episodio actual"
-          value={form.episodio_actual}
-          onChange={handleChange}
-        />
+      <button onClick={guardar}>
+        {editando ? "Actualizar" : "Guardar"}
+      </button>
 
-        <select
-          name="estado_personal"
-          value={form.estado_personal}
-          onChange={handleChange}
-        >
-          <option value="viendo">Viendo</option>
-          <option value="completado">Completado</option>
-          <option value="en_pausa">Pausa</option>
-          <option value="abandonado">Abandonado</option>
-        </select>
+      <h4>Mi progreso</h4>
 
-        {editando ? (
-          <>
-            <button onClick={actualizarProgreso}>
-              Actualizar
+      {progreso.map(p => (
+        <div key={p.id} className="card">
+
+          <div>
+            <b>{p.titulo}</b> <br />
+            Episodio: {p.episodio_actual} <br />
+            Estado: {p.estado_personal}
+          </div>
+
+          <div>
+            <button onClick={() => editar(p)}>Editar</button>
+            <button className="delete" onClick={() => eliminar(p.id)}>
+              Eliminar
             </button>
+          </div>
 
-            <button onClick={limpiarForm}>
-              Cancelar
-            </button>
-          </>
-        ) : (
-          <button onClick={crearProgreso}>
-            Guardar Progreso
-          </button>
-        )}
-
-      </div>
-
-      {/* LISTA */}
-      <h3 style={{paddingLeft:"20px"}}> Historial</h3>
-
-      <div className="grid">
-
-        {lista.length === 0 ? (
-          <p>No hay progreso registrado</p>
-        ) : (
-          lista.map(p => (
-            <div className="card" key={p.id}>
-
-              {/* YA NO SON IDS */}
-              <p><b>Usuario:</b> {obtenerNombreUsuario(p.usuario_id)}</p>
-
-              <p><b>Título:</b> {obtenerNombreTitulo(p.titulo_id)}</p>
-
-              <p><b>Episodio:</b> {p.episodio_actual}</p>
-              <p><b>Estado:</b> {p.estado_personal}</p>
-
-              <button onClick={() => seleccionarProgreso(p)}>
-                Editar
-              </button>
-
-              <button onClick={() => eliminarProgreso(p.id)}>
-                Eliminar
-              </button>
-
-            </div>
-          ))
-        )}
-
-      </div>
+        </div>
+      ))}
 
     </div>
   );

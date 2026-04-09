@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from dependencies import get_db
 from models.usuario import Usuario
-from schemas.usuario_schema import UsuarioCreate
+from schemas.usuario_schema import UsuarioCreate, UsuarioUpdate
 from dependencies import solo_admin
 
 router = APIRouter()
@@ -49,7 +49,7 @@ def obtener_usuario(id: int, db: Session = Depends(get_db)):
     return usuario
 
 @router.put("/{id}")
-def actualizar_usuario(id: int, data: UsuarioCreate, db: Session = Depends(get_db)):
+def actualizar_usuario(id: int, data: UsuarioUpdate, db: Session = Depends(get_db)):
 
     usuario = db.query(Usuario).filter(Usuario.id == id).first()
 
@@ -58,7 +58,9 @@ def actualizar_usuario(id: int, data: UsuarioCreate, db: Session = Depends(get_d
 
     usuario.nombre = data.nombre
     usuario.correo = data.correo
-    usuario.contraseña = data.contraseña
+    usuario.rol = data.rol
+    if data.contraseña:
+        usuario.contraseña = data.contraseña
 
     db.commit()
 
