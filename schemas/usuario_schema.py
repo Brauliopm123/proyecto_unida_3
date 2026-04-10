@@ -18,7 +18,7 @@ class UsuarioOut(BaseModel):
 class UsuarioUpdate(BaseModel):
     nombre: str
     correo: str
-    contraseña: Optional[str] = None  # 🔥 CLAVE
+    contraseña: Optional[str] = None
     rol: str
 
 class Config:

@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Usuario from "./pages/Usuario";
+import Register from "./pages/Register";
 
 function App() {
 
   const [usuario, setUsuario] = useState(null);
+  const [vista, setVista] = useState("login");
 
   // Cargar sesión guardada
   useEffect(() => {
@@ -20,11 +22,16 @@ function App() {
   const logout = () => {
     localStorage.removeItem("usuario");
     setUsuario(null);
+    setVista("login");
   };
 
   // SI NO ESTÁ LOGUEADO
   if (!usuario) {
-    return <Login setUsuario={setUsuario} />;
+    return vista === "login" ? (
+      <Login setUsuario={setUsuario} setVista={setVista} />
+    ) : (
+      <Register setVista={setVista} />
+    );
   }
 
   return (

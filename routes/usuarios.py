@@ -16,6 +16,30 @@ def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     db.refresh(nuevo_usuario)
     return nuevo_usuario
 
+@router.post("/registro")
+def registrar_usuario(data: UsuarioCreate, db: Session = Depends(get_db)):
+
+    # Verificar si ya existe
+    existente = db.query(Usuario).filter(Usuario.correo == data.correo).first()
+
+    if existente:
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
+
+    nuevo = Usuario(
+        nombre=data.nombre,
+        correo=data.correo,
+        contraseña=data.contraseña,
+        rol="usuario"  # SIEMPRE usuario
+    )
+
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+
+    return {
+        "mensaje": "Usuario registrado correctamente"
+    }
+
 
 @router.get("/")
 def obtener_usuarios(db: Session = Depends(get_db)):

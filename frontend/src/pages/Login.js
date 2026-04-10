@@ -1,7 +1,8 @@
 import { useState } from "react";
 import API from "../services/api";
 
-function Login({ setUsuario }) {
+
+function Login({ setUsuario, setVista }) {
 
   const [form, setForm] = useState({
     correo: "",
@@ -49,6 +50,10 @@ function Login({ setUsuario }) {
 
       <button onClick={login}>
         Iniciar sesión
+      </button>
+
+      <button onClick={() => setVista("register")} style={{cursor: "pointer"}}>
+        Crear cuenta
       </button>
 
     </div>

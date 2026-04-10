@@ -17,7 +17,7 @@ function Progreso({ usuario }) {
     "usuario-id": usuario.id
   };
 
-  // 🔥 useCallback para evitar warning
+  // useCallback para evitar warning
   const cargar = useCallback(async () => {
     try {
       const resProgreso = await API.get(`/progreso/usuario/${usuario.id}`);
@@ -31,12 +31,12 @@ function Progreso({ usuario }) {
     }
   }, [usuario.id]);
 
-  // 🔄 Ejecutar carga inicial
+  // Ejecutar carga inicial
   useEffect(() => {
     cargar();
-  }, [cargar]); // 🔥 ya no hay warning
+  }, [cargar]); // ya no hay warning
 
-  // 💾 Guardar (crear o editar)
+  // Guardar (crear o editar)
   const guardar = async () => {
     try {
 
@@ -63,14 +63,14 @@ function Progreso({ usuario }) {
 
       setEditando(null);
 
-      cargar(); // 🔥 refresca automáticamente
+      cargar(); // refresca automáticamente
 
     } catch (error) {
       console.log(error.response?.data);
     }
   };
 
-  // ✏️ Editar
+  // Editar
   const editar = (p) => {
     setEditando(p.id);
     setForm({
@@ -80,7 +80,7 @@ function Progreso({ usuario }) {
     });
   };
 
-  // ❌ Eliminar
+  // Eliminar
   const eliminar = async (id) => {
     if (!window.confirm("¿Eliminar progreso?")) return;
 
@@ -89,7 +89,7 @@ function Progreso({ usuario }) {
 
       alert("Progreso eliminado");
 
-      cargar(); // 🔥 refresca correctamente
+      cargar(); // refresca correctamente
 
     } catch (error) {
       console.log(error);

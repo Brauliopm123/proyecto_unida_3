@@ -17,7 +17,7 @@ function Usuarios({ usuario }) {
     "usuario-id": usuario.id
   };
 
-  // 🔄 Cargar usuarios
+  // Cargar usuarios
   const cargar = async () => {
     try {
       const res = await API.get("/usuarios/");
@@ -31,12 +31,12 @@ function Usuarios({ usuario }) {
     cargar();
   }, []);
 
-  // 💾 Guardar (crear / editar)
+  // Guardar (crear / editar)
   const guardar = async () => {
     try {
       let data = { ...form };
 
-      // 🔥 NO enviar contraseña si está vacía
+      // NO enviar contraseña si está vacía
       if (!data.contraseña) {
         delete data.contraseña;
       }
@@ -59,26 +59,26 @@ function Usuarios({ usuario }) {
 
       setEditando(null);
 
-      cargar(); // 🔥 refrescar lista
+      cargar(); // refrescar lista
 
     } catch (error) {
       console.log(error.response?.data);
     }
   };
 
-  // ✏️ Editar
+  // Editar
   const editar = (u) => {
     setEditando(u.id);
 
     setForm({
       nombre: u.nombre,
       correo: u.correo,
-      contraseña: "", // 🔥 no traer contraseña
+      contraseña: "", // no traer contraseña
       rol: u.rol
     });
   };
 
-  // ❌ Eliminar
+  // Eliminar
   const eliminar = async (id) => {
     if (!window.confirm("¿Eliminar usuario?")) return;
 
@@ -86,14 +86,14 @@ function Usuarios({ usuario }) {
       await API.delete(`/usuarios/${id}`, { headers });
       alert("Usuario eliminado");
 
-      cargar(); // 🔥 refrescar lista
+      cargar(); // refrescar lista
 
     } catch (error) {
       console.log(error);
     }
   };
 
-  // ❌ Cancelar edición
+  // Cancelar edición
   const cancelar = () => {
     setEditando(null);
     setForm({
