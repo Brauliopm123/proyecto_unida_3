@@ -6,38 +6,84 @@ function Register({ setVista }) {
   const [form, setForm] = useState({
     nombre: "",
     correo: "",
-    contraseña: ""
+    password: ""
   });
+
+  const [error, setError] = useState("");
 
   const registrar = async () => {
     try {
+      setError("");
+
+      if (!form.nombre || !form.correo || !form.password) {
+        setError("Todos los campos son obligatorios");
+        return;
+      }
+
       await API.post("/usuarios/registro", form);
-      alert("Usuario creado correctamente");
+
+      alert("Usuario registrado correctamente");
       setVista("login");
-    } catch (error) {
-      alert(error.response?.data?.detail);
+
+    } catch (err) {
+      setError(err.response?.data?.detail || "Error al registrar");
     }
   };
 
   return (
-    <div className="card">
+    <div className="container">
 
-      <h2>Registro</h2>
+      <div className="card">
 
-      <input placeholder="Nombre"
-        onChange={(e) => setForm({...form, nombre: e.target.value})} />
+        <h2>Registro</h2>
 
-      <input placeholder="Correo"
-        onChange={(e) => setForm({...form, correo: e.target.value})} />
-       
-      <input type="contraseña" placeholder="Contraseña"
-        onChange={(e) => setForm({...form, contraseña: e.target.value})} />
+        {error && <p className="error">{error}</p>}
 
-      <button onClick={registrar}>Registrarse</button>
+        <div className="form-group">
 
-      <p onClick={() => setVista("login")} style={{cursor: "pointer"}}>
-        Ya tengo cuenta
-      </p>
+          <input
+            placeholder="Nombre"
+            value={form.nombre}
+            onChange={(e) =>
+              setForm({ ...form, nombre: e.target.value })
+            }
+          />
+
+          <input
+            placeholder="Correo"
+            value={form.correo}
+            onChange={(e) =>
+              setForm({ ...form, correo: e.target.value })
+            }
+          />
+
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={form.password}
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
+
+        </div>
+
+        <div className="form-actions">
+
+          <button onClick={registrar}>
+            Registrarse
+          </button>
+
+          <span
+            className="link"
+            onClick={() => setVista("login")}
+          >
+            Ya tengo cuenta
+          </span>
+
+        </div>
+
+      </div>
 
     </div>
   );
