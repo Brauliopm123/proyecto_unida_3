@@ -6,7 +6,7 @@ function Register({ setVista }) {
   const [form, setForm] = useState({
     nombre: "",
     correo: "",
-    password: ""
+    contraseña: ""
   });
 
   const [error, setError] = useState("");
@@ -15,24 +15,33 @@ function Register({ setVista }) {
     try {
       setError("");
 
-      if (!form.nombre || !form.correo || !form.password) {
+      if (!form.nombre || !form.correo || !form.contraseña) {
         setError("Todos los campos son obligatorios");
         return;
       }
 
-      await API.post("/usuarios/registro", form);
+      await API.post("/usuarios/registro", {
+        nombre: form.nombre,
+        correo: form.correo,
+        contraseña: form.contraseña   // 🔥 CORREGIDO
+      });
 
       alert("Usuario registrado correctamente");
       setVista("login");
 
     } catch (err) {
-      setError(err.response?.data?.detail || "Error al registrar");
+      console.log(err.response?.data);
+
+      setError(
+        err.response?.data?.detail?.[0]?.msg ||
+        err.response?.data?.detail ||
+        "Error al registrar"
+      );
     }
   };
 
   return (
     <div className="container">
-
       <div className="card">
 
         <h2>Registro</h2>
@@ -60,9 +69,9 @@ function Register({ setVista }) {
           <input
             type="password"
             placeholder="Contraseña"
-            value={form.password}
+            value={form.contraseña}
             onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
+              setForm({ ...form, contraseña: e.target.value })
             }
           />
 
@@ -84,7 +93,6 @@ function Register({ setVista }) {
         </div>
 
       </div>
-
     </div>
   );
 }

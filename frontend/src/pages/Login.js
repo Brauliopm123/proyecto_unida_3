@@ -5,7 +5,7 @@ function Login({ setUsuario, setVista }) {
 
   const [form, setForm] = useState({
     correo: "",
-    password: ""
+    contraseña: ""
   });
 
   const [error, setError] = useState("");
@@ -14,33 +14,37 @@ function Login({ setUsuario, setVista }) {
     try {
       setError("");
 
-      if (!form.correo || !form.password) {
+      if (!form.correo || !form.contraseña) {
         setError("Completa todos los campos");
         return;
       }
 
-      const res = await API.post("/login", form);
+      const res = await API.post("/auth/login", {
+        correo: form.correo,
+        contraseña: form.contraseña   // 🔥 CORREGIDO
+      });
 
-      // Guardar sesión
       localStorage.setItem("usuario", JSON.stringify(res.data));
       setUsuario(res.data);
 
     } catch (err) {
-      setError("Credenciales incorrectas");
+      console.log(err.response?.data);
+
+      setError(
+        err.response?.data?.detail ||
+        "Credenciales incorrectas"
+      );
     }
   };
 
   return (
     <div className="container">
-
       <div className="card">
 
         <h2>Iniciar Sesión</h2>
 
-        {/* 🔴 ERROR */}
         {error && <p className="error">{error}</p>}
 
-        {/* 🧾 FORM */}
         <div className="form-group">
 
           <input
@@ -54,15 +58,14 @@ function Login({ setUsuario, setVista }) {
           <input
             type="password"
             placeholder="Contraseña"
-            value={form.password}
+            value={form.contraseña}
             onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
+              setForm({ ...form, contraseña: e.target.value })
             }
           />
 
         </div>
 
-        {/* 🎯 ACCIONES */}
         <div className="form-actions">
 
           <button onClick={login}>
@@ -79,7 +82,6 @@ function Login({ setUsuario, setVista }) {
         </div>
 
       </div>
-
     </div>
   );
 }
